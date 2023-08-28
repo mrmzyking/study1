@@ -1,7 +1,7 @@
 import time
 
-from rs232study import *
-from tcpclient import *
+from study001.rs232study import *
+from study001.tcpclient import *
 
 
 class RS232ToTCP(tcpclientsocket, RS232Class):
@@ -48,14 +48,14 @@ class RS232ToTCP(tcpclientsocket, RS232Class):
             if RS232Class.getRS232RxDQueue_Info(self).not_empty :
                 data = RS232Class.getRS232RxDQueue_Info(self).get()
                 tcpclientsocket.TCPgetTCPTxDQueue_Info(self).put(data)
-                print("RS232ToUDP : RS232DuleRecvData is in ......")
+                print("{} RS232ToUDP : RS232DuleRecvData is in ......".format(datetime.now(),))
 
     def TCPDuleRecvData(self, ):
         while True :
             if tcpclientsocket.TCPgetTCPRxDQueue_Info(self).not_empty :
                 data = tcpclientsocket.TCPgetTCPRxDQueue_Info(self).get()
                 RS232Class.getRS232TxDQueue_Info(self).put(data)
-                print("RS232ToUDP : UDPDuleRecvData is in ......")
+                print("{} RS232ToUDP : UDPDuleRecvData is in ......".format(datetime.now(),))
 
 
 if __name__ == '__main__':

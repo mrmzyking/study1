@@ -1,4 +1,6 @@
 import threading
+from datetime import datetime
+
 import serial
 from threading import Thread, Lock
 import time
@@ -50,10 +52,10 @@ class RS232Class(threading.Thread):
                                                stopbits=self.uartStopbits,
                                                timeout=self.uarttimeout)
             self.RS232isConnectFlag = True
-            print("Open ok : when open {} , has successed".format(self.uartPort))
+            print("{} Open ok : when open {} , has successed".format(datetime.now(),self.uartPort))
         except Exception as e :
             self.RS232isConnectFlag = False
-            print("Open Err : when open {} , has err {}".format(self.uartPort,e))
+            print("{} Open Err : when open {} , has err {}".format(datetime.now(),self.uartPort,e))
             time.sleep(5)
 
     def is_Port_Open(self):
@@ -83,7 +85,7 @@ class RS232Class(threading.Thread):
                         data = self.RS232TxDQueue_Info.get()
                         # self.uartTxRxLock.acquire()
                         self.uartInterface.write(data)
-                        print("RS232Class : RS232 Client Info: TxD Data ({} bytes) from server !)".format(len(data)))
+                        print("{} RS232Class : RS232 Client Info: TxD Data ({} bytes) from server !)".format(datetime.now(),len(data)))
                         # self.uartTxRxLock.release()
                     except Exception as e:
                         self.RS232isConnectFlag = False
@@ -100,7 +102,7 @@ class RS232Class(threading.Thread):
                         data = self.uartInterface.readall()
                         # self.uartTxRxLock.release()
                         if len(data) != 0 :
-                            print("RS232 Client Info: RxD Data ({} bytes) from server !)".format(len(data)))
+                            print("{} RS232 Client Info: RxD Data ({} bytes) from server !)".format(datetime.now(),len(data)))
                             self.RS232RxDQueue_Info.put(data)
                     except Exception as e:
                         self.RS232isConnectFlag = False
@@ -111,7 +113,7 @@ class RS232Class(threading.Thread):
             if self.RS232RxDQueue_Info.not_empty :
                 data = self.RS232RxDQueue_Info.get()
                 self.RS232TxDQueue_Info.put(data)
-                print("RS232Class : RS232DuleRecvData is in ......")
+                print("{} RS232Class : RS232DuleRecvData is in ......".format(datetime.now(),))
 
 
 if __name__ == '__main__':

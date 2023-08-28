@@ -3,18 +3,16 @@ import os
 import time
 import datetime
 from typing import Any
-from rs232totcp import *
-from rs232toudp import *
-from rs232study import *
-from tcpclient import *
-from udpclient import *
+from study001.rs232totcp import *
+from study001.rs232toudp import *
+from study001.rs232study import *
+from study001.tcpclient import *
+from study001.udpclient import *
 import socket
 import threading
 from threading import Thread, Lock
 import time
 import queue
-
-from appdirs import unicode
 
 """
 {
@@ -182,7 +180,7 @@ class JsonFileFindClass(object):
             rtval = dictinfo["IPMode"]
             rtflag = True
         except Exception as e:
-            print("Err : Json file has no IPMode , {}".format(e))
+            print("{} Err : Json file has no IPMode , {}".format(datetime.now(),e))
         return rtflag, rtval
 
     def AnalyzeRS232(self, dictinfo: dict):
@@ -196,7 +194,7 @@ class JsonFileFindClass(object):
         except Exception as e:
             retflag = False
             retval = None
-            print("Err : Json file has no RS232".format(e))
+            print("{} Err : Json file has no RS232".format(datetime.now(),e))
         if retflag is True:
             try:
                 pname = dictval["PortName"]
@@ -211,8 +209,8 @@ class JsonFileFindClass(object):
                 retflag = False
                 retval = None
                 print(
-                    "Err : Json file(RS232 {}) has no item(PortName,BaudRate,ByteSize,Parity,StopBits,TimeOut ) {}".format(
-                        dictval, e))
+                    "{} Err : Json file(RS232 {}) has no item(PortName,BaudRate,ByteSize,Parity,StopBits,TimeOut ) {}".format(
+                        datetime.now(),dictval, e))
         return retflag, retval
 
     def AnalyzeTCPClient(self, dictinfo: dict):
@@ -226,7 +224,7 @@ class JsonFileFindClass(object):
         except Exception as e:
             retflag = False
             retval = None
-            print("Err : Json file has no TCPClient".format(e))
+            print("{} Err : Json file has no TCPClient {}".format(datetime.now(),e))
         if retflag is True:
             try:
                 dip = dictval["DesIP"]
@@ -237,8 +235,8 @@ class JsonFileFindClass(object):
                 retflag = False
                 retval = None
                 print(
-                    "Err : Json file(TCPClient {}) has no item(DesIP,DesPort) {}".format(
-                        dictval, e))
+                    "{} Err : Json file(TCPClient {}) has no item(DesIP,DesPort) {}".format(
+                        datetime.now(),dictval, e))
         return retflag, retval
 
     def AnalyzeUDPClient(self, dictinfo: dict):
@@ -252,7 +250,7 @@ class JsonFileFindClass(object):
         except Exception as e:
             retflag = False
             retval = None
-            print("Err : Json file has no UDPClient".format(e))
+            print("{} Err : Json file has no UDPClient".format(datetime.now(),e))
         if retflag is True:
             try:
                 sport = dictval["SorPort"]
@@ -264,8 +262,8 @@ class JsonFileFindClass(object):
                 retflag = False
                 retval = None
                 print(
-                    "Err : Json file(UDPClient {}) has no item(DesIP,DesPort) {}".format(
-                        dictval, e))
+                    "{} Err : Json file(UDPClient {}) has no item(DesIP,DesPort) {}".format(
+                        datetime.now(),dictval, e))
         return retflag, retval
 
     def AnanyzlyJsonFile(self):
@@ -273,14 +271,14 @@ class JsonFileFindClass(object):
         load_dict = None
         retval = None
         if newfile is None:
-            print("Err  : No Jsonfile has been found!")
+            print("{} Err  : No Jsonfile has been found!".format(datetime.now(),))
         else:
             # 根据返回数据进行文件打开和读取操作
             try:
                 with open(newfile, 'r') as load_f:
                     load_dict = json.load(load_f)
             except Exception as e:
-                print("Err : File open fault: {}".format(e))
+                print("{} Err : File open fault: {}".format(datetime.now(),e))
             print(load_dict)
             flag1, retval1 = self.AnalyzeIPMode(load_dict)
             flag2, retval2 = self.AnalyzeRS232(load_dict)
@@ -323,4 +321,4 @@ if __name__ == '__main__':
         c.start()
         c.join()
     else:
-        print("Err : only support TCPClient and UDPClient")
+        print("{} Err : only support TCPClient and UDPClient".format(datetime.now(),))

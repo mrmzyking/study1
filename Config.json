@@ -2,19 +2,19 @@
   "IPMode": "TCPClient",
   "RS232": {
     "PortName": "COM7",
-    "BaudRate": 2500000,
+    "BaudRate": 9600,
     "ByteSize": 8.0,
     "Parity": "N",
     "StopBits": 1.0,
-    "TimeOut": 0.02
+    "TimeOut": 0.2
   },
   "TCPClient": {
     "DesIP":"127.0.0.1",
     "DesPort": 4001
   },
   "UDPClient":{
-    "SorPort": 4001,
     "DesIP": "127.0.0.1",
-    "DesPort": 8888
+    "DesPort": 8888,
+    "SorPort": 4001
   }
 }

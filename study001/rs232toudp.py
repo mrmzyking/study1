@@ -1,7 +1,7 @@
 import time
 
-from rs232study import *
-from udpclient import *
+from study001.rs232study import *
+from study001.udpclient import *
 
 
 class RS232ToUDP(udpclientsocket, RS232Class):
@@ -54,14 +54,14 @@ class RS232ToUDP(udpclientsocket, RS232Class):
             if RS232Class.getRS232RxDQueue_Info(self).not_empty :
                 data = RS232Class.getRS232RxDQueue_Info(self).get()
                 udpclientsocket.getUDPTxDQueue_Info(self).put(data)
-                print("RS232ToUDP : RS232DuleRecvData is in ......")
+                print("{} RS232ToUDP : RS232DuleRecvData is in ......".format(datetime.now(),))
 
     def UDPDuleRecvData(self, ):
         while True :
             if udpclientsocket.getUDPRxDQueue_Info(self).not_empty :
                 data = udpclientsocket.getUDPRxDQueue_Info(self).get()
                 RS232Class.getRS232TxDQueue_Info(self).put(data)
-                print("RS232ToUDP : UDPDuleRecvData is in ......")
+                print("{} RS232ToUDP : UDPDuleRecvData is in ......".format(datetime.now(),))
 
 
 if __name__ == '__main__':

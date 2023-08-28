@@ -1,5 +1,6 @@
 import socket
 import threading
+from datetime import datetime
 from threading import Thread, Lock
 import time
 import queue
@@ -69,18 +70,18 @@ class tcpclientsocket(threading.Thread):
             try:
                 self.serversocket.connect((self.serveripaddr, self.serveripport))
                 self.TCPisConnectFlag = True
-                print("Client Info: Connect Server({},{}) successed......".format(self.serveripaddr, self.serveripport))
+                print( "{} Client Info: Connect Server({},{}) successed......".format(datetime.now(),self.serveripaddr, self.serveripport))
             except Exception as e :
-                print("Client Info: Connect Server({},{}) failed.:{}".format(self.serveripaddr, self.serveripport,e))
+                print("{} Client Info: Connect Server({},{}) failed.:{}".format(datetime.now(),self.serveripaddr, self.serveripport,e))
                 self.TCPisConnectFlag = False
                 self.serversocket.close()
         else:
             if flag1 is True:
-                print("Client Info: Connect Server({},{}) failed......(server ip addr is wrong!)".format(
-                    self.serveripaddr, self.serveripport))
+                print("{} Client Info: Connect Server({},{}) failed......(server ip addr is wrong!)".format(
+                    datetime.now(),self.serveripaddr, self.serveripport))
             if flag2 is True:
-                print("Client Info: Connect Server({},{}) failed......(server ip port is wrong!)".format(
-                    self.serveripaddr, self.serveripport))
+                print("{} Client Info: Connect Server({},{}) failed......(server ip port is wrong!)".format(
+                    datetime.now(),self.serveripaddr, self.serveripport))
 
     def TCPIsServerDisconnect(self):
         while True:
@@ -100,11 +101,11 @@ class tcpclientsocket(threading.Thread):
                     if len(recvdata) > 0:
                         self.RxdTime = time.time()
                         datalens = len(recvdata)
-                        print("Client Info: Recv Data ({} bytes) from server!)".format(datalens))
+                        print("{} Client Info: Recv Data ({} bytes) from server!)".format(datetime.now(),datalens))
                         self.TCPRxDQueue_Info.put(recvdata)
                 except Exception as e:
                     self.TCPRxDQueue_Info.empty()
-                    print("Client Info: Recv Data ({},{}) failed.:{}".format(self.serveripaddr, self.serveripport, e))
+                    print("{} Client Info: Recv Data ({},{}) failed.:{}".format(datetime.now(),self.serveripaddr, self.serveripport, e))
                     self.TCPisConnectFlag = False
 
     def TCPSendDataToServer(self):
@@ -118,9 +119,9 @@ class tcpclientsocket(threading.Thread):
                         datalens = len(data)
                         self.serversocket.send(data)
                         self.TxdTime = time.time()
-                        print("Client Info: Transport Data ({} bytes) from server !)".format(datalens))
+                        print("{} Client Info: Transport Data ({} bytes) from server !)".format(datetime.now(),datalens))
                 except Exception as e:
-                    print("Client Info: Txd Data ({},{}) failed.:{}".format(self.serveripaddr, self.serveripport, e))
+                    print("{} Client Info: Txd Data ({},{}) failed.:{}".format(datetime.now(),self.serveripaddr, self.serveripport, e))
                     self.TCPTxDQueue_Info.empty()
                     self.TCPisConnectFlag = False
 

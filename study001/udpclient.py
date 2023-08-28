@@ -1,4 +1,5 @@
 import socket
+from datetime import datetime
 from threading import Thread, Lock
 import time
 import queue
@@ -90,18 +91,18 @@ class udpclientsocket(Thread):
                 # socket.AF_INET: 网络类型，IPv4
                 # socket.SOCK_DGRAM： UDP 客户端
                 self.isConnectFlag = True
-                print("Client Info: Connect Server({},{}) successed......".format(self.serveripaddr, self.serveripport))
+                print("{} Client Info: Connect Server({},{}) successed......".format(datetime.now(),self.serveripaddr, self.serveripport))
             except Exception as e:
-                print("Client Info: Connect Server({},{}) failed.:{}".format(self.serveripaddr, self.serveripport, e))
+                print("{} Client Info: Connect Server({},{}) failed.:{}".format(datetime.now(),self.serveripaddr, self.serveripport, e))
                 self.isConnectFlag = False
                 self.serversocket.close()
         else:
             if flag1 is True:
-                print("Client Info: Connect Server({},{}) failed......(server ip addr is wrong!)".format(
-                    self.serveripaddr, self.serveripport))
+                print("{} Client Info: Connect Server({},{}) failed......(server ip addr is wrong!)".format(
+                    datetime.now(),self.serveripaddr, self.serveripport))
             if flag2 is True:
-                print("Client Info: Connect Server({},{}) failed......(server ip port is wrong!)".format(
-                    self.serveripaddr, self.serveripport))
+                print("{} Client Info: Connect Server({},{}) failed......(server ip port is wrong!)".format(
+                    datetime.now(),self.serveripaddr, self.serveripport))
 
     def UDPIsServerDisconnect(self):
         """
@@ -121,7 +122,7 @@ class udpclientsocket(Thread):
                 try:
                     response, address = self.serversocket.recvfrom(1024)
                     self.UDPRxDQueue_Info.put(response)
-                    print("UDP Client Info: Recv Data ({} bytes) from server {}!)".format(len(response), address))
+                    print("{} UDP Client Info: Recv Data ({} bytes) from server {}!)".format(datetime.now(),len(response), address))
                 except Exception as e:
                     self.isConnectFlag = False
 
@@ -131,7 +132,7 @@ class udpclientsocket(Thread):
                 txddata = self.UDPTxDQueue_Info.get()
                 try:
                     self.serversocket.sendto(txddata, (self.serveripaddr, self.serveripport))
-                    print("UDP Client Info: Send Data ({} bytes) to server !)".format(len(txddata)))
+                    print("{} UDP Client Info: Send Data ({} bytes) to server !)".format(datetime.now(),len(txddata)))
                 except Exception as e:
                     self.isConnectFlag = False
 
@@ -140,7 +141,7 @@ class udpclientsocket(Thread):
             if self.UDPRxDQueue_Info.not_empty:
                 data = self.UDPRxDQueue_Info.get()
                 self.UDPTxDQueue_Info.put(data)
-                print("udpclientsocket  : UDPDuleRecvData is in ......")
+                print("{} udpclientsocket  : UDPDuleRecvData is in ......".format(datetime.now(),))
 
 
 if __name__ == '__main__':
