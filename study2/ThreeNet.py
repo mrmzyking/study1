@@ -1,3 +1,4 @@
 import numpy as np
-class netmode(object):
+# P83
+class NetMode(object):
     def __init__(self,):
