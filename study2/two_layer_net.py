@@ -89,6 +89,7 @@ if __name__ == '__main__':
     # 超参数
     iters_num = 50000
     train_size = x_train.shape[0]
+    test_size = x_test.shape[0]
     batch_size = 100
     learning_rate = 0.01
     iter_per_epoch = max(train_size / batch_size, 1)
@@ -114,5 +115,10 @@ if __name__ == '__main__':
             test_acc = network.accuracy(x_test, t_test)
             train_acc_list.append(train_acc)
             test_acc_list.append(test_acc)
-            print("train acc, test acc | " + str(train_acc) + ", " + str(test_acc))
-    # print(train_loss_list)
+            # print("train acc, test acc | " + str(train_acc) + ", " + str(test_acc))
+    print("train_over!..........")
+    batch_mask = np.random.choice(test_size, batch_size)
+    x_batch = x_test[batch_mask]
+    t_batch = t_test[batch_mask]
+    y = network.predict(x_batch)
+    print(y)
