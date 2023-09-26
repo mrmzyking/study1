@@ -1,83 +1,129 @@
 import numpy as np
-import sys,os
+import sys, os
+
 sys.path.append(os.pardir)
 from dataset.mnist import load_mnist
 
-class ThreeNetWork(object):
+
+class FourNetWork(object):
     def __init__(self):
-        self.W1 = np.zeros(shape=(2, 3), dtype=float)
-        self.b1 = np.zeros(shape=(1, 3), dtype=float)
-        self.W2 = np.zeros(shape=(3, 2), dtype=float)
-        self.b2 = np.zeros(shape=(1, 2), dtype=float)
-        self.W3 = np.zeros(shape=(2, 1), dtype=float)
-        self.b3 = np.zeros(shape=(1, 1), dtype=float)
+        self.params = {}
+        self.params['W1'] = 0.01 * np.random.randn(784, 500)
+        self.params['b1'] = np.zeros(500)
+        self.params['W2'] = 0.01 * np.random.randn(500, 200)
+        self.params['b2'] = np.zeros(200)
+        self.params['W3'] = 0.01 * np.random.randn(200, 50)
+        self.params['b3'] = np.zeros(50)
+        self.params['W4'] = 0.01 * np.random.randn(50, 10)
+        self.params['b4'] = np.zeros(10)
 
-    def setW1(self, w1: np):
-        if w1.shape[0] == 2 and w1.shape[1] == 3:
-            self.W1 = w1
-
-    def setW2(self, w2: np):
-        if w2.shape[0] == 3 and w2.shape[1] == 2:
-            self.W2 = w2
-
-    def setW3(self, w3: np):
-        if w3.shape[0] == 2 and w3.shape[1] == 2:
-            self.W3 = w3
-
-    def setB1(self, b1: np):
-        if b1.shape[0] == 1 and b1.shape[1] == 3:
-            self.b1 = b1
-
-    def setB2(self, b2: np):
-        if b2.shape[0] == 1 and b2.shape[1] == 2:
-            self.b2 = b2
-
-    def setB3(self, b3: np):
-        if b3.shape[0] == 1 and b3.shape[1] == 2:
-            self.b3 = b3
-
-    def init_network(self):
-        network = {}
-        network['W1'] = self.W1
-        network['b1'] = self.b1
-        network['W2'] = self.W2
-        network['b2'] = self.b2
-        network['W3'] = self.W3
-        network['b3'] = self.b3
-        return network
-
-    def sigmoid(self, x: np):
+    def sigmoid(self, x):
         return 1 / (1 + np.exp(-x))
 
-    def identity_function(self, x):
-        return x
+    def softmax(self, x):
+        x = x - np.max(x, axis=-1, keepdims=True)
+        return np.exp(x) / np.sum(np.exp(x), axis=-1, keepdims=True)
 
-    def softmax(self,a):
-        c = np.max(a)
-        exp_a = np.exp(a - c)  # 溢出对策
-        sum_exp_a = np.sum(exp_a)
-        y = exp_a / sum_exp_a
-        return y
-    def forword(self, network, x):
-        W1, W2, W3 = network['W1'], network['W2'], network['W3']
-        b1, b2, b3 = network['b1'], network['b2'], network['b3']
+    def predict(self, x):
+        W1, W2, W3, W4 = self.params['W1'], self.params['W2'], self.params['W3'], self.params['W4']
+        b1, b2, b3, b4 = self.params['b1'], self.params['b2'], self.params['b3'], self.params['b4']
+
         a1 = np.dot(x, W1) + b1
         z1 = self.sigmoid(a1)
         a2 = np.dot(z1, W2) + b2
         z2 = self.sigmoid(a2)
         a3 = np.dot(z2, W3) + b3
-        y = self.identity_function(a3)
+        z3 = self.sigmoid(a3)
+        a4 = np.dot(z3, W4) + b4
+        y = self.softmax(a4)
         return y
+
+    def cross_entropy_error(self, y, t):
+        if y.ndim == 1:
+            t = t.reshape(1, t.size)
+            y = y.reshape(1, y.size)
+        if t.size == y.size:
+            t = t.argmax(axis=1)
+        batch_size = y.shape[0]
+        return -np.sum(np.log(y[np.arange(batch_size), t] + 1e-7)) / batch_size
+
+    def numerical_gradient(self, f, x):
+        h = 1e-4  # 0.0001
+        grad = np.zeros_like(x)
+        it = np.nditer(x, flags=['multi_index'], op_flags=['readwrite'])
+        while not it.finished:
+            idx = it.multi_index
+            tmp_val = x[idx]
+            x[idx] = tmp_val + h
+            fxh1 = f(x)  # f(x+h)
+            x[idx] = tmp_val - h
+            fxh2 = f(x)  # f(x-h)
+            grad[idx] = (fxh1 - fxh2) / (2 * h)
+            x[idx] = tmp_val  # 値を元に戻す
+            it.iternext()
+        return grad
+
+    def loss(self, x, t):
+        y = self.predict(x)
+        lossval = self.cross_entropy_error(y, t)
+        return lossval
+    def accuracy(self, x, t):
+        y = self.predict(x)
+        y = np.argmax(y, axis=1)
+        t = np.argmax(t, axis=1)
+
+        accuracy = np.sum(y == t) / float(x.shape[0])
+        return accuracy
+
+    def numerical_gradient_end(self, x, t):
+        loss_W = lambda w: self.loss(x, t)
+        grads = {}
+        grads['W1'] = self.numerical_gradient(loss_W, self.params['W1'])
+        grads['b1'] = self.numerical_gradient(loss_W, self.params['b1'])
+        grads['W2'] = self.numerical_gradient(loss_W, self.params['W2'])
+        grads['b2'] = self.numerical_gradient(loss_W, self.params['b2'])
+        grads['W3'] = self.numerical_gradient(loss_W, self.params['W3'])
+        grads['b3'] = self.numerical_gradient(loss_W, self.params['b3'])
+        grads['W4'] = self.numerical_gradient(loss_W, self.params['W4'])
+        grads['b4'] = self.numerical_gradient(loss_W, self.params['b4'])
+        return grads
 
 
 if __name__ == '__main__':
-    t = ThreeNetWork()
-    t.setW1(np.array([[0.2, 0.8, 0.6],[0.5, 0.7, 0.9]]))
-    t.setB1(np.array([[0.4, 0.5, 0.6]]))
-    t.setW2(np.array([[0.5, 0.4], [0.8, 0.7], [0.6, 0.3]]))
-    t.setB2(np.array([[0.2, 0.7]]))
-    t.setW3(np.array([[0.5,0.6], [0.5,0.6]]))
-    t.setB3(np.array([0.5,0.9]))
-    network = t.init_network()
-    y = t.forword(network, np.array([0.5, 0.6]))
-    print(y)
+    network = FourNetWork()
+    (x_train, t_train), (x_test, t_test) = load_mnist(normalize=True, one_hot_label=True)
+
+    train_loss_list = []
+    train_acc_list = []
+    test_acc_list = []
+    # 平均每个epoch的重复次数
+    # 超参数
+    iters_num = 100
+    train_size = x_train.shape[0]
+    test_size = x_test.shape[0]
+    batch_size = 10
+    learning_rate = 0.01
+    iter_per_epoch = max(train_size / batch_size, 1)
+    for i in range(iters_num):
+        # 获取mini-batch
+        batch_mask = np.random.choice(train_size, batch_size)
+        x_batch = x_train[batch_mask]
+        t_batch = t_train[batch_mask]
+        # 计算梯度
+        grad = network.numerical_gradient_end(x_batch, t_batch)
+        # grad = network.gradient(x_batch, t_batch) # 高速版!
+        # 更新参数
+        for key in ('W1', 'b1', 'W2', 'b2'):
+            network.params[key] -= learning_rate * grad[key]
+
+        # 记录学习过程
+        loss = network.loss(x_batch, t_batch)
+        # print("{} loss = {} ".format(datetime.now(),loss))
+        train_loss_list.append(loss)
+        # 计算每个epoch的识别精度
+        if i % iter_per_epoch == 0:
+            train_acc = network.accuracy(x_train, t_train)
+            test_acc = network.accuracy(x_test, t_test)
+            train_acc_list.append(train_acc)
+            test_acc_list.append(test_acc)
+            print("train acc, test acc | " + str(train_acc) + ", " + str(test_acc))
